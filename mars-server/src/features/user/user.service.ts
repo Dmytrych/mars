@@ -1,35 +1,48 @@
-import { getLoginUser, createUser } from "./user.repository";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { UserLoginResult, UserRegistrationResult } from "./user.types";
+import { ValidationResult } from "../../common/validation-result";
+import { IUserRepository } from "./user.repository";
+import { AppConfig } from "../configuration";
 
-export const register = async (email: string, password: string, name: string) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await createUser({ email, password: hashedPassword, name });
+export interface IUserService {
+  register(email: string, password: string, name: string): Promise<UserRegistrationResult>;
+  login(email: string, password: string): Promise<ValidationResult<UserLoginResult>>;
+}
 
-  if (!user) {
-    throw new Error("Failed to create user");
+export class UserService implements IUserService {
+  constructor(private readonly userRepository: IUserRepository, private readonly appConfig: AppConfig) {}
+
+  async register(email: string, password: string, name: string): Promise<UserRegistrationResult> {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await this.userRepository.createUser({ email, password: hashedPassword, name });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    };
   }
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-  };
-};
+  async login(email: string, password: string): Promise<ValidationResult<UserLoginResult>> {
+    const user = await this.userRepository.getLoginUser(email);
 
-export const login = async (email: string, password: string) => {
-  const user = await getLoginUser(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return {
+        success: false,
+        error: {
+          message: "Invalid credentials",
+        },
+      };
+    }
 
-  if (!user) {
-    throw new Error("User not found");
+    const accessToken = jwt.sign({ id: user.id, email: user.email }, this.appConfig.api.auth.jwtSecret, { expiresIn: "1h" });
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+      },
+    };
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new Error("Invalid credentials");
-  }
-
-  // Generate a token (e.g., JWT) here if needed
-  return {
-    accessToken: "mocked-access-token", // Replace with actual token generation logic
-  };
-};
+}

@@ -4,7 +4,7 @@ const configSchema = z.object({
   api: z.object({
     port: z.number(),
     auth: z.object({
-      apiKey: z.string()
+      jwtSecret: z.string()
     })
   }),
   db: z.object({
@@ -26,7 +26,7 @@ export function loadConfig(): AppConfig {
       api: {
         port: z.coerce.number().parse(process.env.PORT),
         auth: {
-          apiKey: z.coerce.string().parse(process.env.AUTH_APIKEY)
+          jwtSecret: z.coerce.string().parse(process.env.JWT_SECRET)
         }
       },
       db: {

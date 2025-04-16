@@ -1,17 +1,26 @@
-import db from "../../database/database";
 import {USER_TABLE_NAME, UserModel} from "../../database/models/user.model";
+import {Knex} from "knex";
 
-export const getLoginUser = async (email: string) => {
-  return db<UserModel>(USER_TABLE_NAME)
-    .select("*")
-    .where({ email })
-    .first();
+export interface IUserRepository {
+  getLoginUser(email: string): Promise<UserModel | undefined>;
+  createUser(user: { email: string; password: string; name: string }): Promise<UserModel>;
 }
 
-export const createUser = async (user: { email: string; password: string; name: string }) => {
-  const [createdUser] = await db<UserModel>(USER_TABLE_NAME)
-    .insert(user)
-    .returning(["id", "email", "name"]);
-  return createdUser;
-};
+export class UserRepository implements IUserRepository {
+  constructor(private readonly db: Knex) {}
+
+  async getLoginUser(email: string) {
+    return this.db<UserModel>(USER_TABLE_NAME)
+      .select("*")
+      .where({ email })
+      .first();
+  }
+
+  async createUser(user: { email: string; password: string; name: string }) {
+    const [createdUser] = await this.db<UserModel>(USER_TABLE_NAME)
+      .insert(user)
+      .returning("*");
+    return createdUser;
+  };
+}
 

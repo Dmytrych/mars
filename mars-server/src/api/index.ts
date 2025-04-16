@@ -4,6 +4,7 @@ import {loadConfig} from "../features/configuration";
 import auth from '@fastify/auth'
 import {registerRoutes} from "./routes";
 import {serializerCompiler, validatorCompiler, ZodTypeProvider} from "fastify-type-provider-zod";
+import {fastifyAwilixPlugin} from '@fastify/awilix'
 
 export const initApi = async () => {
   configDotenv()
@@ -23,6 +24,9 @@ export const initApi = async () => {
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
 
+  fastify.decorate('config', config)
+
+  fastify.register(fastifyAwilixPlugin, { disposeOnClose: true, disposeOnResponse: true })
   fastify.register(auth)
 
   fastify.register(registerRoutes, { prefix: '/v1' })
