@@ -1,6 +1,16 @@
 import knex from 'knex';
-import config from "./knexfile";
+import {AppConfig} from "../features/configuration";
 
-const database = knex(config)
-
-export default database;
+export const createDatabase = (config: AppConfig) => {
+  const dbConfig = {
+    client: "pg",
+    connection: {
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.database,
+    }
+  }
+  return knex(dbConfig);
+}

@@ -1,14 +1,12 @@
 import Fastify from 'fastify'
-import {configDotenv} from "dotenv";
-import {loadConfig} from "../features/configuration";
 import auth from '@fastify/auth'
 import {registerRoutes} from "./routes";
 import {serializerCompiler, validatorCompiler, ZodTypeProvider} from "fastify-type-provider-zod";
-import {fastifyAwilixPlugin} from '@fastify/awilix'
+import {diContainer, fastifyAwilixPlugin} from '@fastify/awilix'
+import {AppConfig} from "../features/configuration";
+import load from "./container";
 
-export const initApi = async () => {
-  configDotenv()
-  const config = loadConfig()
+export const initApi = async (config: AppConfig) => {
   const fastify = Fastify({
     logger: {
       transport: {
@@ -21,15 +19,25 @@ export const initApi = async () => {
     }
   }).withTypeProvider<ZodTypeProvider>();
 
+  await fastify.register(fastifyAwilixPlugin, {
+    container: diContainer,
+    disposeOnClose: true,
+    asyncDispose: true,
+    asyncInit: true,
+    eagerInject: true,
+    disposeOnResponse: false,
+  })
+
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
 
   fastify.decorate('config', config)
 
-  fastify.register(fastifyAwilixPlugin, { disposeOnClose: true, disposeOnResponse: true })
-  fastify.register(auth)
+  await fastify.register(auth)
 
-  fastify.register(registerRoutes, { prefix: '/v1' })
+  fastify.diContainer.register(load(config, fastify.log))
+
+  await fastify.register(registerRoutes, { prefix: '/v1' })
 
   try {
     await fastify.listen({ port: config.api.port })

@@ -6,8 +6,16 @@ export interface IUserRepository {
   createUser(user: { email: string; password: string; name: string }): Promise<UserModel>;
 }
 
+export type UserRepositoryDependencies = {
+  db: Knex
+}
+
 export class UserRepository implements IUserRepository {
-  constructor(private readonly db: Knex) {}
+  private readonly db: Knex
+
+  constructor(dependencies: UserRepositoryDependencies) {
+    this.db = dependencies.db;
+  }
 
   async getLoginUser(email: string) {
     return this.db<UserModel>(USER_TABLE_NAME)

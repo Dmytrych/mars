@@ -5,7 +5,7 @@
   "scripts": {
     "knex": "tsx ./node_modules/knex/bin/cli.js",
     "start": "npx tsx src/index.ts",
-    "dev": "npx tsx watch ./src/index.ts",
+    "dev": "NODE_ENV=development npx tsx watch ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dmytro Khabaznia",

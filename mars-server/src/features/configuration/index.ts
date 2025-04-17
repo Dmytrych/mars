@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const configSchema = z.object({
+  nodeEnv: z.enum(["development", "production"]),
   api: z.object({
     port: z.number(),
     auth: z.object({
@@ -8,13 +9,13 @@ const configSchema = z.object({
     })
   }),
   db: z.object({
-    connectionString: z.string(),
-    host: z.string(),
-    port: z.coerce.number(),
-    user: z.string(),
-    database: z.string(),
-    password: z.string(),
-    ssl: z.coerce.boolean()
+    connectionString: z.string().optional(),
+    host: z.string().optional(),
+    port: z.coerce.number().optional(),
+    user: z.string().optional(),
+    database: z.string().optional(),
+    password: z.string().optional(),
+    ssl: z.coerce.boolean().optional()
   })
 });
 
@@ -23,6 +24,7 @@ export type AppConfig = z.infer<typeof configSchema>;
 export function loadConfig(): AppConfig {
   try {
     const config: AppConfig = {
+      nodeEnv: z.enum(["development", "production"]).parse(process.env.NODE_ENV),
       api: {
         port: z.coerce.number().parse(process.env.PORT),
         auth: {
