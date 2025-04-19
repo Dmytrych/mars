@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { UserLoginResult, UserRegistrationResult } from "./user.types";
-import { ValidationResult } from "../../common/validation-result";
-import { IUserRepository } from "./user.repository";
-import { AppConfig } from "../configuration";
-import {ILogger} from "../../common/logger";
+import { createSigner } from "fast-jwt";
+import { UserLoginResult, UserRegistrationResult } from "../user.types";
+import { ValidationResult } from "../../../common/validation-result";
+import { IUserRepository } from "../repositories/user.repository";
+import { AppConfig } from "../../configuration";
+import {ILogger} from "../../../common/logger";
 
 export interface IUserService {
   register(email: string, password: string, name: string): Promise<UserRegistrationResult>;
@@ -56,7 +56,11 @@ export class UserService implements IUserService {
     }
 
     this.logger.info(`Login success: ${email}`);
-    const accessToken = jwt.sign({ id: user.id, email: user.email }, this.appConfig.api.auth.jwtSecret, { expiresIn: "1h" });
+    const signer = createSigner({
+      key: this.appConfig.api.auth.jwtSecret,
+      expiresIn: this.appConfig.api.auth.jwtLifespanSeconds * 1000,
+    });
+    const accessToken = signer({ id: user.id, email: user.email });
 
     return {
       success: true,

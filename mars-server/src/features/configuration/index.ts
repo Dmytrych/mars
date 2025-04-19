@@ -5,7 +5,8 @@ const configSchema = z.object({
   api: z.object({
     port: z.number(),
     auth: z.object({
-      jwtSecret: z.string()
+      jwtSecret: z.string(),
+      jwtLifespanSeconds: z.number()
     })
   }),
   db: z.object({
@@ -28,7 +29,8 @@ export function loadConfig(): AppConfig {
       api: {
         port: z.coerce.number().parse(process.env.PORT),
         auth: {
-          jwtSecret: z.coerce.string().parse(process.env.JWT_SECRET)
+          jwtSecret: z.coerce.string().parse(process.env.JWT_SECRET),
+          jwtLifespanSeconds: z.coerce.number().parse(process.env.JWT_LIFESPAN_SECONDS)
         }
       },
       db: {

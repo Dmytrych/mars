@@ -5,6 +5,7 @@ import {serializerCompiler, validatorCompiler, ZodTypeProvider} from "fastify-ty
 import {diContainer, fastifyAwilixPlugin} from '@fastify/awilix'
 import {AppConfig} from "../features/configuration";
 import load from "./container";
+import {tokenPlugin} from "../plugins/token-plugin";
 
 export const initApi = async (config: AppConfig) => {
   const fastify = Fastify({
@@ -31,9 +32,11 @@ export const initApi = async (config: AppConfig) => {
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
 
-  fastify.decorate('config', config)
-
   await fastify.register(auth)
+  await fastify.register(tokenPlugin, {
+    secret: config.api.auth.jwtSecret,
+    expiresIn: config.api.auth.jwtLifespanSeconds,
+  })
 
   fastify.diContainer.register(load(config, fastify.log))
 

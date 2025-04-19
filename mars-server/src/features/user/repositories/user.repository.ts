@@ -1,4 +1,4 @@
-import {USER_TABLE_NAME, UserModel} from "../../database/models/user.model";
+import {USER_TABLE_NAME, UserModel} from "../../../database/models/user.model";
 import {Knex} from "knex";
 
 export interface IUserRepository {
