@@ -1,10 +1,11 @@
 'use client'
 
 import LoginForm from "./LoginForm";
+import {signIn} from "next-auth/react";
 
 export default function LoginPage() {
   const handleLogin = (data: { email: string; password: string }) => {
-    console.log("Login data:", data);
+    signIn('credentials', { redirect: false, password: data.password, email: data.email });
   };
 
   return (

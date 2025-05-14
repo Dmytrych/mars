@@ -5,5 +5,10 @@ export type UserRegistrationResult = {
 }
 
 export type UserLoginResult = {
+  user: {
+    id: string,
+    email: string,
+    name: string,
+  },
   accessToken: string
 }

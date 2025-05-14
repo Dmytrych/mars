@@ -55,6 +55,8 @@ export class UserService implements IUserService {
       };
     }
 
+    console.log(user)
+
     this.logger.info(`Login success: ${email}`);
     const signer = createSigner({
       key: this.appConfig.api.auth.jwtSecret,
@@ -65,6 +67,11 @@ export class UserService implements IUserService {
     return {
       success: true,
       data: {
+        user: {
+          id: user.id.toString(),
+          name: user.name,
+          email: user.email,
+        },
         accessToken,
       },
     };
