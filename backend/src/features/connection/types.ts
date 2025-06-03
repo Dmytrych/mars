@@ -11,6 +11,4 @@ export interface IConnection {
 export interface ICreateConnectionParams {
   clientId: string,
   trainerId: string,
-  status: ConnectionStatus,
-  createdAt: Date,
 }

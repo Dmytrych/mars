@@ -7,5 +7,5 @@ export const connectionSchema = z.object({
   clientId: z.string(),
   trainerId: z.string(),
   status: connectionStatusSchema,
-  createdAt: z.string().datetime(),
+  createdAt: z.date(),
 })

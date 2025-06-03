@@ -23,13 +23,15 @@ export class ConnectionService implements IConnectionService {
   }
 
   async add(params: ICreateConnectionParams): Promise<IConnection> {
+    // TODO: Verify that both users exist
+
     const exists = await this.connectionRepository.exists(params.clientId, params.trainerId);
 
     if (exists) {
       throw new ValidationError('Connection already exists');
     }
 
-    return this.connectionRepository.create(params);
+    return this.connectionRepository.create({ ...params, status: 'pending' });
   }
 
   async delete(id: string): Promise<boolean> {
@@ -47,7 +49,7 @@ export class ConnectionService implements IConnectionService {
   private async updateStatus(connectionId: string, status: 'accepted' | 'rejected'): Promise<IConnection> {
     const connection = await this.connectionRepository.get(connectionId);
 
-    if (!connection) {
+    if (!connection || connection.status !== 'pending') {
       throw new ValidationError('Connection not found');
     }
 

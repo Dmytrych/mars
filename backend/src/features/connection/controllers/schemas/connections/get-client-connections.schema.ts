@@ -1,13 +1,13 @@
-import {z} from "zod";
 import {getApiResponseSchema} from "../../../../../common/schemas/request";
+import {connectionSchema} from "./common";
+import {z} from "zod";
+
+const getClientConnectionsResponseSchema = z.array(connectionSchema)
 
 export const getClientConnectionsSchema = {
-  params: z.object({
-    clientId: z.string(),
-  }),
   response: {
     400: getApiResponseSchema(),
-    200: getApiResponseSchema(),
+    200: getApiResponseSchema(getClientConnectionsResponseSchema),
   },
 }
 

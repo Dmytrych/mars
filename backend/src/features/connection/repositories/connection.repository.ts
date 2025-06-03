@@ -37,12 +37,11 @@ export class ConnectionRepository implements IConnectionRepository {
     const created = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
       .insert(project)
       .returning("*")
-      .first();
-    if (!created) {
+    if (!created?.length) {
       throw new Error("Error creating connection: no rows returned");
     }
 
-    return created;
+    return created[0];
   };
 
   async getClientConnections(clientId: string): Promise<IConnectionModel[]> {
