@@ -1,6 +1,8 @@
 import {IConnection, ICreateConnectionParams} from "../types";
 import {ValidationError} from "../../../common/types/errors";
 import { IConnectionRepository } from "../repositories/connection.repository";
+import {IUserRepository} from "../../../common/types/repositories/user.repository";
+import {DbError, UNIQUE_VIOLATION_ERROR} from "../../../common/errors/db-errors";
 
 export interface IConnectionService {
   add(params: ICreateConnectionParams): Promise<IConnection>;
@@ -13,25 +15,32 @@ export interface IConnectionService {
 
 export interface IConnectionServiceDependencies {
   connectionRepository: IConnectionRepository;
+  userRepository: IUserRepository;
 }
 
 export class ConnectionService implements IConnectionService {
   private readonly connectionRepository: IConnectionRepository;
+  private readonly userRepository: IUserRepository;
 
   constructor(dependencies: IConnectionServiceDependencies) {
     this.connectionRepository = dependencies.connectionRepository;
+    this.userRepository = dependencies.userRepository;
   }
 
   async add(params: ICreateConnectionParams): Promise<IConnection> {
-    // TODO: Verify that both users exist
+    const usersExist = await this.userRepository.usersExist([params.trainerId, params.clientId])
 
-    const exists = await this.connectionRepository.exists(params.clientId, params.trainerId);
-
-    if (exists) {
-      throw new ValidationError('Connection already exists');
+    if (!usersExist) {
+      throw new ValidationError('User does not exist');
     }
 
-    return this.connectionRepository.create({ ...params, status: 'pending' });
+    return this.connectionRepository.create({ ...params, status: 'pending' })
+      .catch((err: DbError) => {
+        if (err.constraint === UNIQUE_VIOLATION_ERROR) {
+          throw new ValidationError('Connection already exists');
+        }
+        throw new Error(err.message, err);
+      });
   }
 
   async delete(id: string): Promise<boolean> {
@@ -47,13 +56,7 @@ export class ConnectionService implements IConnectionService {
   }
 
   private async updateStatus(connectionId: string, status: 'accepted' | 'rejected'): Promise<IConnection> {
-    const connection = await this.connectionRepository.get(connectionId);
-
-    if (!connection || connection.status !== 'pending') {
-      throw new ValidationError('Connection not found');
-    }
-
-    return this.connectionRepository.updateStatus(connectionId, status);
+    return this.connectionRepository.updateStatus(connectionId, status)
   }
 
   getClientConnections(clientId: string): Promise<IConnection[]> {

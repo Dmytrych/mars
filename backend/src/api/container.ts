@@ -7,7 +7,7 @@ import * as connectionContainer from "../features/connection/container";
 
 export default async (config: AppConfig, logger: ILogger) => {
   return {
-    db: asValue(await createDatabase(config)),
+    db: asValue(await createDatabase(config, logger)),
     appConfig: asValue(config),
     logger: asValue(logger),
     ...authContainer.load(),

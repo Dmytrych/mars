@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid("trainerId").notNullable();
     table.enum("status", ["pending", "accepted", "rejected"]).notNullable();
     table.datetime("createdAt").notNullable().defaultTo(knex.fn.now());
+    table.unique(["clientId", "trainerId"]);
   });
 }
 

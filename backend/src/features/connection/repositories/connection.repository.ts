@@ -1,5 +1,7 @@
 import {Knex} from "knex";
 import {CONNECTION_TABLE_NAME, ConnectionStatus, IConnectionModel} from "../../../domain/models/connection.model";
+import {DatabaseError} from "pg";
+import {toGeneralDbError} from "../../../common/errors/db-errors";
 
 interface ICreateConnectionParams extends Omit<IConnectionModel, 'id' | 'createdAt'> {}
 
@@ -37,6 +39,11 @@ export class ConnectionRepository implements IConnectionRepository {
     const created = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
       .insert(project)
       .returning("*")
+      .catch((err: DatabaseError) => {
+        throw toGeneralDbError(err);
+      })
+
+
     if (!created?.length) {
       throw new Error("Error creating connection: no rows returned");
     }
@@ -59,9 +66,10 @@ export class ConnectionRepository implements IConnectionRepository {
   };
 
   async updateStatus(id: string, status: ConnectionStatus): Promise<IConnectionModel> {
-    const models = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME).where({ id }).update({
-      status
-    }).returning('*');
+    const models = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME).where({ id })
+      .update({
+        status
+      }).returning('*');
 
     if (models.length != 1) {
       throw new Error(`Error updating connection with id ${id}: expected 1 row to be updated, but got ${models.length}`);

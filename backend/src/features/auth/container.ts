@@ -1,11 +1,11 @@
-import {AuthRepository} from "./repositories/auth.repository";
+import {UserRepository} from "./repositories/user.repository";
 import {asClass} from "awilix";
 import {AuthService} from "./services/auth.service";
 import {AuthController} from "./controllers/auth.controller";
 
 export const load = () => {
   return {
-    authRepository: asClass(AuthRepository),
+    userRepository: asClass(UserRepository),
     authService: asClass(AuthService),
     authController: asClass(AuthController)
   }

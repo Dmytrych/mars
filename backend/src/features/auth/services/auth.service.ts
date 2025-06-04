@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import { createSigner } from "fast-jwt";
-import { LoginResult, RegistrationResult } from "../auth.types";
+import { LoginResult, RegistrationResult } from "../types";
 import { ValidationResult } from "../../../common/validation-result";
-import { IAuthRepository } from "../repositories/auth.repository";
+import { IUserRepository } from "../repositories/user.repository";
 import { AppConfig } from "../../../common/configuration";
 import { ILogger } from "../../../common/logger";
 import { AuthError } from "../errors";
@@ -13,31 +13,31 @@ export interface IAuthService {
 }
 
 export type AuthServiceDependencies = {
-  authRepository: IAuthRepository;
+  userRepository: IUserRepository;
   appConfig: AppConfig;
   logger: ILogger;
 }
 
 export class AuthService implements IAuthService {
-  private readonly authRepository: IAuthRepository
+  private readonly userRepository: IUserRepository
   private readonly appConfig: AppConfig
   private readonly logger: ILogger
 
   constructor(dependencies: AuthServiceDependencies) {
-    this.authRepository = dependencies.authRepository
+    this.userRepository = dependencies.userRepository
     this.appConfig = dependencies.appConfig
     this.logger = dependencies.logger
   }
 
   async register(email: string, password: string, name: string): Promise<RegistrationResult> {
-    const existingUser = await this.authRepository.getUser(email);
+    const existingUser = await this.userRepository.getUser(email);
 
     if (existingUser) {
       throw new AuthError("User already exist");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await this.authRepository.createUser({ email, password: hashedPassword, name });
+    const user = await this.userRepository.createUser({ email, password: hashedPassword, name });
 
     if (!user) {
       throw new Error("User creation failed");
@@ -53,7 +53,7 @@ export class AuthService implements IAuthService {
   }
 
   async login(email: string, password: string): Promise<ValidationResult<LoginResult>> {
-    const user = await this.authRepository.getUser(email);
+    const user = await this.userRepository.getUser(email);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       this.logger.info(`Failed to login: ${email}`);

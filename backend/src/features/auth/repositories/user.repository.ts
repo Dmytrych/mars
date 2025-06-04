@@ -1,21 +1,15 @@
 import {USER_TABLE_NAME, UserModel} from "../../../domain/models/user.model";
 import {Knex} from "knex";
+import {IUserCreateParams, IUserRepository} from "../../../common/types/repositories/user.repository";
 
-interface IUserCreateParams extends Omit<UserModel, 'id' | 'created_at' | 'updated_at'> {}
-
-export interface IAuthRepository {
-  getUser(email: string): Promise<UserModel | undefined>;
-  createUser(user: IUserCreateParams): Promise<UserModel>;
-}
-
-export type AuthRepositoryDependencies = {
+export type UserRepositoryDependencies = {
   db: Knex
 }
 
-export class AuthRepository implements IAuthRepository {
+export class UserRepository implements IUserRepository {
   private readonly db: Knex
 
-  constructor(dependencies: AuthRepositoryDependencies) {
+  constructor(dependencies: UserRepositoryDependencies) {
     this.db = dependencies.db;
   }
 
@@ -31,6 +25,13 @@ export class AuthRepository implements IAuthRepository {
       .insert(user)
       .returning("*");
     return createdUser;
+  };
+
+  async usersExist(userIds: string[] = []): Promise<boolean> {
+    const result = await this.db<UserModel>(USER_TABLE_NAME)
+      .select('id')
+      .whereIn("id", userIds);
+    return result.length === userIds.length;
   };
 }
 
