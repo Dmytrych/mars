@@ -1,19 +1,5 @@
 import {ApiResponse} from "./response-helpers";
-
-export type ValidationResult<TData> = SuccessResult<TData> | FailureResult
-
-type SuccessResult<TData = undefined> = {
-  success: true
-  data?: TData
-}
-
-type FailureResult = {
-  success: false,
-  error?: {
-    message?: string,
-    details?: any
-  }
-}
+import {ValidationResult} from "../types/utils/validation-result";
 
 export const toApiResponse = <TData>(result: ValidationResult<TData>): ApiResponse<TData> => {
   if (!result.success) {

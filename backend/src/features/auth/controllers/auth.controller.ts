@@ -1,7 +1,7 @@
 import {FastifyValidatedHandler} from "../../../common/types/api";
 import {IAuthService} from "../services/auth.service";
-import {getErrorResponse, getSuccessResponse} from "../../../common/response-helpers";
-import {toApiResponse} from "../../../common/validation-result";
+import {getErrorResponse, getSuccessResponse} from "../../../common/utils/response-helpers";
+import {toApiResponse} from "../../../common/utils/validation-result";
 import {RegisterSchemaType} from "./schemas/register.schema";
 import {LoginSchemaType} from "./schemas/login.schema";
 import {AuthError} from "../errors";

@@ -3,6 +3,7 @@ import {ValidationError} from "../../../common/types/errors";
 import { IConnectionRepository } from "../repositories/connection.repository";
 import {IUserRepository} from "../../../common/types/repositories/user.repository";
 import {DbError, UNIQUE_VIOLATION_ERROR} from "../../../common/errors/db-errors";
+import {INotificationService} from "./notification.service";
 
 export interface IConnectionService {
   add(params: ICreateConnectionParams): Promise<IConnection>;
@@ -16,15 +17,18 @@ export interface IConnectionService {
 export interface IConnectionServiceDependencies {
   connectionRepository: IConnectionRepository;
   userRepository: IUserRepository;
+  notificationService: INotificationService;
 }
 
 export class ConnectionService implements IConnectionService {
   private readonly connectionRepository: IConnectionRepository;
   private readonly userRepository: IUserRepository;
+  private readonly notificationService: INotificationService;
 
   constructor(dependencies: IConnectionServiceDependencies) {
     this.connectionRepository = dependencies.connectionRepository;
     this.userRepository = dependencies.userRepository;
+    this.notificationService = dependencies.notificationService
   }
 
   async add(params: ICreateConnectionParams): Promise<IConnection> {
@@ -34,13 +38,16 @@ export class ConnectionService implements IConnectionService {
       throw new ValidationError('User does not exist');
     }
 
-    return this.connectionRepository.create({ ...params, status: 'pending' })
+    const connection = await this.connectionRepository.create({ ...params, status: 'pending' })
       .catch((err: DbError) => {
         if (err.constraint === UNIQUE_VIOLATION_ERROR) {
           throw new ValidationError('Connection already exists');
         }
         throw new Error(err.message, err);
       });
+    await this.notificationService.send()
+
+    return connection
   }
 
   async delete(id: string): Promise<boolean> {

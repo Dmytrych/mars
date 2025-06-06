@@ -1,13 +1,14 @@
 import Fastify, {FastifyInstance} from 'fastify'
 import auth from '@fastify/auth'
 import {registerRoutes} from "./routes";
-import {serializerCompiler, validatorCompiler, ZodTypeProvider} from "fastify-type-provider-zod";
+import {jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProvider} from "fastify-type-provider-zod";
 import {diContainer, fastifyAwilixPlugin} from '@fastify/awilix'
 import {AppConfig} from "../common/configuration";
 import load from "./container";
 import {tokenPlugin} from "../plugins/token-plugin";
 import {errorHandler} from "./error-handler";
 import fastifyCors from "@fastify/cors";
+import swagger from "@fastify/swagger";
 
 const initPlugins = async (fastify: FastifyInstance, config: AppConfig) => {
   await fastify.register(fastifyAwilixPlugin, {
@@ -32,6 +33,24 @@ const initPlugins = async (fastify: FastifyInstance, config: AppConfig) => {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })
+
+  await fastify.register(swagger, {
+    openapi: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Test swagger',
+        description: 'Testing the Fastify swagger API',
+        version: '0.1.0'
+      },
+      servers: [
+        {
+          url: 'http://localhost:4000',
+          description: 'Development server'
+        }
+      ],
+    },
+    transform: jsonSchemaTransform
+  });
 }
 
 export const initApi = async (config: AppConfig) => {

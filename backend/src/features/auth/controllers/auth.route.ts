@@ -4,7 +4,7 @@ import {
 import {FastifyInstanceType} from "../../../common/types/api";
 import {AuthController} from "./auth.controller";
 import {registerSchema} from "./schemas/register.schema";
-import {injectionHandler} from "../../../common/container-utils";
+import {injectionHandler} from "../../../common/utils/container-utils";
 
 export async function authRoutes(app: FastifyInstanceType) {
   app.post(

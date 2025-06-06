@@ -1,5 +1,5 @@
 import {FastifyValidatedHandler} from "../../../common/types/api";
-import {getSuccessResponse} from "../../../common/response-helpers";
+import {getSuccessResponse} from "../../../common/utils/response-helpers";
 import {CreateConnectionSchemaType} from "./schemas/connections/create-connection.schema";
 import {DeleteConnectionSchemaType} from "./schemas/connections/delete-connection.schema";
 import {AcceptConnectionSchemaType} from "./schemas/connections/accept-connection.schema";

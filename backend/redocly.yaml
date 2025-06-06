@@ -1,0 +1,9 @@
+extends:
+  - recommended
+
+apis:
+  backend:
+    root: ./openapi/api.yaml
+    rules:
+      no-ambiguous-paths: error
+      no-unused-components: error

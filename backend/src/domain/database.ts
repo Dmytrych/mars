@@ -1,6 +1,6 @@
 import knex from 'knex';
 import {AppConfig} from "../common/configuration";
-import {ILogger} from "../common/logger";
+import {ILogger} from "../common/types/logger";
 
 export const createDatabase = async (appConfig: AppConfig, logger: ILogger) => {
   const dbConfig = {

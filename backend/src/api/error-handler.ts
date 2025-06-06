@@ -1,4 +1,4 @@
-import {getErrorResponse} from "../common/response-helpers";
+import {getErrorResponse} from "../common/utils/response-helpers";
 import {FastifyError, FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
 
 export function errorHandler(this:FastifyInstance, error: FastifyError, _: FastifyRequest, reply: FastifyReply) {

@@ -1,5 +1,5 @@
 import {FastifyInstanceType} from "../../../common/types/api";
-import {injectionHandler} from "../../../common/container-utils";
+import {injectionHandler} from "../../../common/utils/container-utils";
 import {asValue} from "awilix";
 import {IUser} from "../../../common/types/types";
 import {createConnectionRequestSchema} from "./schemas/connections/create-connection.schema";

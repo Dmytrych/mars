@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import { createSigner } from "fast-jwt";
 import { LoginResult, RegistrationResult } from "../types";
-import { ValidationResult } from "../../../common/validation-result";
+import { ValidationResult } from "../../../common/utils/validation-result";
 import { IUserRepository } from "../repositories/user.repository";
 import { AppConfig } from "../../../common/configuration";
-import { ILogger } from "../../../common/logger";
+import { ILogger } from "../../../common/types/logger";
 import { AuthError } from "../errors";
 
 export interface IAuthService {
