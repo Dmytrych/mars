@@ -1,7 +1,5 @@
-import {Knex} from "knex";
-import {CONNECTION_TABLE_NAME, ConnectionStatus, IConnectionModel} from "../../../domain/models/connection.model";
-import {DatabaseError} from "pg";
-import {toGeneralDbError} from "../../../common/errors/db-errors";
+import {ConnectionStatus, IConnectionModel} from "../../../common/types/domain/models";
+import {IConnectionDataSource} from "../../../common/types/domain/data-sources";
 
 interface ICreateConnectionParams extends Omit<IConnectionModel, 'id' | 'createdAt'> {}
 
@@ -12,75 +10,45 @@ export interface IConnectionRepository {
   updateStatus(id: string, status: ConnectionStatus): Promise<IConnectionModel>
   getTrainerConnections(trainerId: string): Promise<IConnectionModel[]>
   getClientConnections(trainerId: string): Promise<IConnectionModel[]>
-  get(id: string): Promise<IConnectionModel | undefined>
+  get(id: string): Promise<IConnectionModel | null>
 }
 
 export interface IConnectionRepositoryDependencies {
-  db: Knex
+  connectionDataSource: IConnectionDataSource
 }
 
 export class ConnectionRepository implements IConnectionRepository {
-  private readonly db: Knex
+  private readonly connectionDataSource: IConnectionDataSource
 
   constructor(dependencies: IConnectionRepositoryDependencies) {
-    this.db = dependencies.db;
+    this.connectionDataSource = dependencies.connectionDataSource;
   }
 
   async exists(clientId: string, trainerId: string): Promise<boolean> {
-    const result = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
-      .where({
-        clientId,
-        trainerId
-      });
-    return result.length > 0;
+    return this.connectionDataSource.exists(clientId, trainerId);
   };
 
-  async create(project: ICreateConnectionParams): Promise<IConnectionModel> {
-    const created = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
-      .insert(project)
-      .returning("*")
-      .catch((err: DatabaseError) => {
-        throw toGeneralDbError(err);
-      })
-
-
-    if (!created?.length) {
-      throw new Error("Error creating connection: no rows returned");
-    }
-
-    return created[0];
+  async create(connectionParams: ICreateConnectionParams): Promise<IConnectionModel> {
+    return this.connectionDataSource.create(connectionParams);
   };
 
   async getClientConnections(clientId: string): Promise<IConnectionModel[]> {
-    return this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
-      .where({ clientId });
+    return this.connectionDataSource.getClientConnections(clientId);
   };
 
   async getTrainerConnections(trainerId: string): Promise<IConnectionModel[]> {
-    return this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
-      .where({ trainerId });
+    return this.connectionDataSource.getTrainerConnections(trainerId);
   };
 
-  async get(id: string): Promise<IConnectionModel | undefined> {
-    return this.db<IConnectionModel>(CONNECTION_TABLE_NAME).where({ id }).first();
+  async get(id: string): Promise<IConnectionModel | null> {
+    return this.connectionDataSource.get(id);
   };
 
   async updateStatus(id: string, status: ConnectionStatus): Promise<IConnectionModel> {
-    const models = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME).where({ id })
-      .update({
-        status
-      }).returning('*');
-
-    if (models.length != 1) {
-      throw new Error(`Error updating connection with id ${id}: expected 1 row to be updated, but got ${models.length}`);
-    }
-    return models[0];
+    return this.connectionDataSource.updateStatus(id, status);
   };
 
   async delete(id: string): Promise<boolean> {
-    const affectedRows = await this.db<IConnectionModel>(CONNECTION_TABLE_NAME)
-      .where({ id })
-      .del();
-    return affectedRows > 0;
+    return this.connectionDataSource.delete(id);
   };
 }

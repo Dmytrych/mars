@@ -1,37 +1,33 @@
-import {USER_TABLE_NAME, UserModel} from "../../../domain/models/user.model";
-import {Knex} from "knex";
-import {IUserCreateParams, IUserRepository} from "../../../common/types/repositories/user.repository";
+import {IUserCreateParams, IUserDataSource} from "../../../common/types/domain/data-sources";
+import {IUserModel} from "../../../common/types/domain/models";
+
+export interface IUserRepository {
+  getUser(email: string): Promise<IUserModel | null>;
+  createUser(user: IUserCreateParams): Promise<IUserModel>;
+  usersExist(userIds: string[]): Promise<boolean>
+}
 
 export type UserRepositoryDependencies = {
-  db: Knex
+  userDataSource: IUserDataSource
 }
 
 export class UserRepository implements IUserRepository {
-  private readonly db: Knex
+  private readonly userDataSource: IUserDataSource
 
   constructor(dependencies: UserRepositoryDependencies) {
-    this.db = dependencies.db;
+    this.userDataSource = dependencies.userDataSource;
   }
 
   async getUser(email: string) {
-    return this.db<UserModel>(USER_TABLE_NAME)
-      .select("*")
-      .where({ email })
-      .first();
+    return this.userDataSource.getUser(email);
   }
 
-  async createUser(user: IUserCreateParams): Promise<UserModel> {
-    const [createdUser] = await this.db<UserModel>(USER_TABLE_NAME)
-      .insert(user)
-      .returning("*");
-    return createdUser;
+  async createUser(user: IUserCreateParams): Promise<IUserModel> {
+    return this.userDataSource.createUser(user);
   };
 
   async usersExist(userIds: string[] = []): Promise<boolean> {
-    const result = await this.db<UserModel>(USER_TABLE_NAME)
-      .select('id')
-      .whereIn("id", userIds);
-    return result.length === userIds.length;
+    return this.userDataSource.usersExist(userIds);
   };
 }
 

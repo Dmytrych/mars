@@ -10,7 +10,7 @@ async function run() {
   const channel = await initAmqp(appConfig)
 
   await channel.consume(Queue.Notification, (message) => {
-    console.log(message?.content.toString());
+    console.log("TODO: IMPLEMENT");
   })
 }
 

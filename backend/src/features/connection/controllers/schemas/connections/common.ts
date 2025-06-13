@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const connectionStatusSchema = z.enum(["pending", "accepted", "rejected"]);
+export const connectionStatusSchema = z.enum(["PENDING", "ACCEPTED", "REJECTED"]);
 
 export const connectionSchema = z.object({
   id: z.string(),

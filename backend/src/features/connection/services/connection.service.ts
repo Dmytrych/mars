@@ -1,9 +1,9 @@
 import {IConnection, ICreateConnectionParams} from "../types";
 import {ValidationError} from "../../../common/types/errors";
 import { IConnectionRepository } from "../repositories/connection.repository";
-import {IUserRepository} from "../../../common/types/repositories/user.repository";
 import {DbError, UNIQUE_VIOLATION_ERROR} from "../../../common/errors/db-errors";
 import {INotificationService} from "./notification.service";
+import {IUserRepository} from "../../auth/repositories/user.repository";
 
 export interface IConnectionService {
   add(params: ICreateConnectionParams): Promise<IConnection>;
@@ -38,7 +38,7 @@ export class ConnectionService implements IConnectionService {
       throw new ValidationError('User does not exist');
     }
 
-    const connection = await this.connectionRepository.create({ ...params, status: 'pending' })
+    const connection = await this.connectionRepository.create({ ...params, status: 'PENDING' })
       .catch((err: DbError) => {
         if (err.constraint === UNIQUE_VIOLATION_ERROR) {
           throw new ValidationError('Connection already exists');
@@ -55,14 +55,14 @@ export class ConnectionService implements IConnectionService {
   }
 
   async accept(connectionId: string): Promise<IConnection> {
-    return this.updateStatus(connectionId, 'accepted');
+    return this.updateStatus(connectionId, 'ACCEPTED');
   }
 
   async reject(connectionId: string): Promise<IConnection> {
-    return this.updateStatus(connectionId, 'rejected');
+    return this.updateStatus(connectionId, 'REJECTED');
   }
 
-  private async updateStatus(connectionId: string, status: 'accepted' | 'rejected'): Promise<IConnection> {
+  private async updateStatus(connectionId: string, status: 'ACCEPTED' | 'REJECTED'): Promise<IConnection> {
     return this.connectionRepository.updateStatus(connectionId, status)
   }
 

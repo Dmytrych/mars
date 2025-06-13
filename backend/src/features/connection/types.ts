@@ -1,4 +1,4 @@
-import {ConnectionStatus} from "../../domain/models/connection.model";
+import {ConnectionStatus} from "../../common/types/domain/models";
 
 export interface IConnection {
   id: string,
