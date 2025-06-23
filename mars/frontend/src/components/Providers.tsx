@@ -1,13 +1,16 @@
 'use client'
 
-import {SessionProvider} from "next-auth/react";
-import type { Session } from "next-auth";
+import {ReactNode} from 'rea'
 
-const Providers = ({ children, session }: { children: React.ReactNode, session: Session | null }) => {
+interface IProvidersProps {
+  children: ReactNode
+}
+
+const Providers = ({ children }: IProvidersProps) => {
   return (
-    <SessionProvider session={session}>
+    <>
       {children}
-    </SessionProvider>
+    </>
   );
 }
 

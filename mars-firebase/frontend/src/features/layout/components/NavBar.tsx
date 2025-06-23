@@ -6,11 +6,13 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import {Button} from "@/components/ui/button";
-import {signIn, signOut, useSession} from "next-auth/react";
 import Link from "next/link";
+import useAuthStore from "@/common/store/auth-store";
+import { signOut } from "firebase/auth";
+import { auth } from "@/common/firebase/clientApp";
 
 const NavBar = () => {
-  const { data } = useSession();
+  const { user } = useAuthStore()
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
@@ -20,7 +22,7 @@ const NavBar = () => {
             <NavigationMenuItem>
               <Link href='/'>Home</Link>
             </NavigationMenuItem>
-            {data?.user && (
+            {auth.currentUser && (
               <NavigationMenuItem>
                 <Link href='/projects'>Projects</Link>
               </NavigationMenuItem>
@@ -29,17 +31,21 @@ const NavBar = () => {
         </NavigationMenu>
         <NavigationMenu>
           <NavigationMenuList className='gap-5'>
-            {data?.user && (
+            {user && (
               <NavigationMenuItem>
-                {data?.user.name}
+                {user.displayName}
               </NavigationMenuItem>
             )}
             <NavigationMenuItem>
-              {data?.user ? (
-                <Button onClick={() => signOut()}>Sign Out</Button>
+              {user ? (
+                <Button onClick={() => signOut(auth)}>Sign Out</Button>
               ) : (
                 <>
-                  <Button onClick={() => signIn()}>Sign In</Button>
+                  <Link href='/auth/login'>
+                    <Button>
+                      Sign In
+                    </Button>
+                  </Link>
                   <Link href='/auth/register'>
                     <Button>
                       Register

@@ -1,17 +1,14 @@
-'use client'
-
-import { db } from "@/common/firebase/clientApp";
 import { getAll } from "@/common/firebase/firestore";
-import { useEffect } from "react";
+import { getAuthenticatedAppForUser } from "@/common/firebase/serverApp";
+import { getFirestore } from "firebase/firestore";
 
 const HomePage = async () => {
-  useEffect(() => {
-    getAll(db).then((data) => console.log(data))
-  }, [])
+  const { firebaseServerApp } = await getAuthenticatedAppForUser()
 
+  const data = await getAll(getFirestore(firebaseServerApp))
   return (
     <div className="flex justify-center">
-      Home page
+      {JSON.stringify(data)}
     </div>
   );
 }

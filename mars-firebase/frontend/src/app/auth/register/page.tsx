@@ -1,24 +1,20 @@
 'use client'
 
 import RegistrationForm from "@/features/auth/components/RegistrationForm";
-import {register} from "@/common/api/auth/auth.repository";
 import {RegistrationFormData} from "@/features/auth/types";
-import {signIn, useSession} from "next-auth/react";
 import {redirect} from "next/navigation";
+import { useAuthStore } from "@/common/store/auth-store";
 
 const RegisterPage = () => {
-  const session = useSession();
+  const { user, register } = useAuthStore()
 
-  if (session.data) {
+  if (!user) {
     redirect("/");
   }
 
   const handleSubmit = async (formData: RegistrationFormData) => {
-    await register(formData.name, formData.email, formData.password)
-      .then(() => signIn('credentials', {
-        redirect: true,
-        callbackUrl: "/"
-      }));
+    register(formData)
+      .then(() => redirect("/auth/login"));
   }
 
   return (
