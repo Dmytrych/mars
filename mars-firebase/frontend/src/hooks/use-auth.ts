@@ -1,35 +1,27 @@
-import { auth } from "@/common/firebase/clientApp";
-import useAuthStore from "@/common/store/auth-store";
-import { deleteCookie, setCookie } from "cookies-next";
-import { onAuthStateChanged } from "firebase/auth";
-import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import { auth } from '@/firebase/clientApp';
+import useAuthStore from '@/store/auth-store';
+import { deleteCookie, setCookie } from 'cookies-next';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect } from 'react';
 
 const useAuth = () => {
-  const { user, token, loading, setUser, setToken, setLoading } = useAuthStore();
+	const { user, isLoading, setUser, setLoading } = useAuthStore();
   
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setLoading(false)
-        setUser(null)
-        setToken(null)
-        await deleteCookie("__session");
-        redirect("/auth/login")
-      } else {
-        setUser(user)
-        const idToken = await user?.getIdToken()
-        setToken(idToken)
-        await setCookie("__session", idToken);
-      }
-    });
+	useEffect(() => {
+		return onAuthStateChanged(auth, async (user) => {
+			if (!user) {
+				setLoading(false)
+				setUser(null)
+				await deleteCookie('__session');
+			} else {
+				setUser(user)
+				const idToken = await user?.getIdToken()
+				await setCookie('__session', idToken);
+			}
+		});
+	}, [setUser, setLoading])
 
-    return () => {
-      unsubscribe()
-    }
-  }, [])
-
-  return { user, token, loading, setLoading }
+	return { user, isLoading, setLoading }
 }
 
 export default useAuth

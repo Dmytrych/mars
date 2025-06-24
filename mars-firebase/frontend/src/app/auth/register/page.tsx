@@ -1,25 +1,26 @@
 'use client'
 
-import RegistrationForm from "@/features/auth/components/RegistrationForm";
-import {RegistrationFormData} from "@/features/auth/types";
-import {redirect} from "next/navigation";
-import { useAuthStore } from "@/common/store/auth-store";
+import { createUserWithCredentials } from '@/firebase/auth';
+import useAuthStore from '@/store/auth-store';
+import RegistrationForm from '@/features/auth/components/RegistrationForm';
+import {RegistrationFormData} from '@/features/auth/types';
+import {redirect} from 'next/navigation';
 
 const RegisterPage = () => {
-  const { user, register } = useAuthStore()
+	const { user } = useAuthStore()
 
-  if (!user) {
-    redirect("/");
-  }
+	if (!user) {
+		redirect('/');
+	}
 
-  const handleSubmit = async (formData: RegistrationFormData) => {
-    register(formData)
-      .then(() => redirect("/auth/login"));
-  }
+	const handleSubmit = async (formData: RegistrationFormData) => {
+		createUserWithCredentials(formData.email, formData.password)
+			.then(() => redirect('/auth/login'));
+	}
 
-  return (
-    <RegistrationForm onSubmit={handleSubmit}/>
-  );
+	return (
+		<RegistrationForm onSubmit={handleSubmit}/>
+	);
 }
 
 export default RegisterPage;
