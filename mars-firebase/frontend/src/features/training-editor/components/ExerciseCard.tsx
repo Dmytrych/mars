@@ -18,16 +18,16 @@ import Image from 'next/image';
 type ExerciseCardProps = {
   imageSrc: string;
   title: string;
-  description: string;
   initiallyOpen?: boolean;
+	expandableContent: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
 	imageSrc,
 	title,
-	description,
 	initiallyOpen = false,
 	className,
+	expandableContent,
 	...rest
 }) => {
 	const [open, setOpen] = React.useState(initiallyOpen);
@@ -38,7 +38,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 			{...rest}
 		>
 			<Collapsible open={open} onOpenChange={setOpen}>
-				<CardHeader className="flex flex-row items-center gap-4 p-4">
+				<CardHeader className="flex flex-row items-center gap-4">
 					{/* Clickable area toggles open state */}
 					<button
 						onClick={() => setOpen(!open)}
@@ -58,7 +58,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
 					<CollapsibleTrigger asChild>
 						<button
-							className="rounded-full p-1 transition hover:bg-muted"
+							className="rounded-full transition hover:bg-muted"
 							aria-label={open ? 'Collapse' : 'Expand'}
 						>
 							<ChevronDown
@@ -71,8 +71,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 				</CardHeader>
 
 				<CollapsibleContent>
-					<CardContent className="p-4 pt-0">
-						<p className="text-sm text-muted-foreground">{description}</p>
+					<CardContent className="p-4 pt-3">
+						{expandableContent}
 					</CardContent>
 				</CollapsibleContent>
 			</Collapsible>

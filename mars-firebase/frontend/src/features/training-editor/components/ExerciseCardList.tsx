@@ -1,61 +1,36 @@
 'use client';
 
 import * as React from 'react';
-import ExerciseCard from './ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { ExerciseParam } from '../types';
 
 export type Exercise = {
   id: string;
   imageSrc: string;
   title: string;
   description: string;
+	params: ExerciseParam[]
 };
 
 type ExerciseCardListProps = {
-  exercises: Exercise[];
+  children: React.ReactNode[];
   onAdd?: () => void;
-  onChange?: (updated: Exercise[]) => void;
   className?: string;
 };
 
 const ExerciseCardList: React.FC<ExerciseCardListProps> = ({
-	exercises,
+	children,
 	onAdd,
-	onChange,
 	className,
 }) => {
-	const [items, setItems] = React.useState<Exercise[]>(exercises);
-	React.useEffect(() => setItems(exercises), [exercises]);
-
 	const handleAdd = () => {
-		if (onAdd) {
-			onAdd();
-			return;
-		}
-
-		const newItem: Exercise = {
-			id: crypto.randomUUID(),
-			imageSrc: '/placeholder.svg',
-			title: 'New Exercise',
-			description: 'Describe the exercise here…',
-		};
-
-		const updated = [...items, newItem];
-		setItems(updated);
-		onChange?.(updated);
+		onAdd?.()
 	};
 
 	return (
-		<div className={`flex flex-col gap-4 ${className ?? ''}`}>
-			{items.map((ex) => (
-				<ExerciseCard
-					key={ex.id}
-					imageSrc={ex.imageSrc}
-					title={ex.title}
-					description={ex.description}
-				/>
-			))}
+		<div className={`flex flex-col gap-2 ${className ?? ''}`}>
+			{children}
 			<Button
 				variant="outline"
 				size="icon"
